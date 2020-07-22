@@ -42,12 +42,6 @@ class Utilities {
         return total;
     }
 
-    printMissingInput() {
-        console.log("\nNo command line arguments passed");
-        console.log("Please run again and pass one or more command line arguments");
-        console.log('Valid arguments include the integers 1, 2, 3, 4, 5, or 6\n\n');
-    }
-
     printPrettyDays(days) {
         console.log('\x1b[36m%s\x1b[0m', `Processed dates:`);
         for (let day in days) {
@@ -58,10 +52,6 @@ class Utilities {
     printHeader(num) {
         console.log('--------------------------------------------------------------------------------------------------');
         console.log('\x1b[36m%s\x1b[0m', `\nSet #${num}`);
-    }
-
-    printDivider() {
-        console.log('--------------------------------------------------------------------------------------------------\n');
     }
 }
 

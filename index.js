@@ -14,26 +14,25 @@ let util = new Utilities();
 let args = process.argv.slice(2);
 
 if (args.length < 1) {
-    util.printMissingInput();
-} else {
-    if (util.validateArgs(args)) {
-        for (let arg of args) {
-            util.printHeader(arg);
+    args = ['1', '2', '3', '4', '5', '6'];
+}
 
-            let set = new Set(arg); // build new set by passing the argument to constructor
+if (util.validateArgs(args)) {
+    for (let arg of args) {
+        util.printHeader(arg);
 
-            // get each day and calculate if it's a travel or full day
-            //  and gracefully handle overlapping project days!
-            //       a.k.a. do magic
-            let days = set.getDayTypes();
-        
-            // get reimbursements in a dollar amount
-            let reimbursements = util.sumReimbursements(days);
+        let set = new Set(arg); // build new set by passing the argument to constructor
 
-            util.printPrettyDays(days);
-        
-            console.log('\x1b[33m%s\x1b[0m', `\nReimbursement amount for Set #${arg}: $${reimbursements}\n`);
-            // util.printDivider();
-        }
+        // get each day and calculate if it's a travel or full day
+        //  and gracefully handle overlapping project days!
+        //       a.k.a. do magic
+        let days = set.getDayTypes();
+    
+        // get reimbursements in a dollar amount
+        let reimbursements = util.sumReimbursements(days);
+
+        util.printPrettyDays(days);
+    
+        console.log('\x1b[33m%s\x1b[0m', `\nReimbursement amount for Set #${arg}: $${reimbursements}\n`);
     }
 }
