@@ -47,7 +47,8 @@ You can also pass multiple sets in one execution. For example: `npm start 1 3 4`
   - Iterate through the days encompassed by that project (**NOTE**: the first day of the first project is always a `travel` day)
   - Based on the data in the processedDates object, assign values to the day that is currently being processed. 
     - Any gaps will have surrounding days marked as `travel` days, and if there are days nestled between travel days they will be marked as `full` days.
-    - Since the projects are sorted by start date, if a project's start date is assigned as a `travel` day, it cannot be overwritten—we know for certain that day will remain a `travel` day; however, if a project's *end date* is assigned as a `travel` day, that value might get overwritten as `full` if new information is processed.
+    - Since the projects are sorted by start date, if a project's start date is assigned as a `travel` day, it cannot be overwritten—we know for certain that day will remain a `travel` day; however, if a project's *end date* is assigned as a `travel` day, that value might get overwritten as a `full` day as new information is processed.
+4) Dollar amounts are calculated using the processedDays object and a lookup table, then summed together to get the total reimbursement amount.
     
 ## Notes on implementation
 - It was ambiguous whether the format of the dates in the examples was D/M/YY or M/D/YY since there were no examples with days over 12. It was assumed that it was the system uses M/D/YY, but in a real-world application I would ask the client, and/or recommend that they use a more universal format, like YYYY-MM-DD
