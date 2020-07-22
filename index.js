@@ -83,15 +83,19 @@ function buildSet(path) {
 function getDollarAmount(dayType, cityCost) {
     if (dayType === 'travel') {
         if (cityCost === 'high') {
+            console.log('travel high');
             return 55;
         } else { // low
+            console.log('travel low');
             return 45;
         }
     } else { // full
         if (cityCost === 'high') {
-            return 75;
-        } else { // low
+            console.log('full high');
             return 85;
+        } else { // low
+            console.log('full low');
+            return 75;
         }
     }
 }
@@ -100,7 +104,7 @@ function calcReimbursements(days) {
     let total = 0;
 
     for (let key in days) {
-        total += getDollarAmount(days[key].cityCost.dayType, days[key].cityCost);
+        total += getDollarAmount(days[key].dayType, days[key].cityCost);
     }
 
     return total;
@@ -157,7 +161,7 @@ function doMagic(projects) {
         }
     }
 
-    processedDays[mostRecentDate].dayType = 'travel'; // manually change last day to a travel day
+    processedDays[oldestDate].dayType = 'travel'; // manually change last day to a travel day
 
     return processedDays;
 }
@@ -165,15 +169,19 @@ function doMagic(projects) {
 
 // grab Projects from JSON (in the /sets/ directory)
 
-let setOne = buildSet('sets/1.json');
-let setTwo = buildSet('sets/2.json');
-let setThree = buildSet('sets/3.json');
-let setFour = buildSet('sets/4.json');
-let setFive = buildSet('sets/5.json');
+let setOne = buildSet('sets/1.json'); // 165
+let setTwo = buildSet('sets/2.json'); // 590
+let setThree = buildSet('sets/3.json'); // 445
+let setFour = buildSet('sets/4.json'); // 185
+let setFive = buildSet('sets/5.json'); // 510
+let setSix = buildSet('sets/6.json'); // 920
 
+console.log(setSix);
 
 // do magic
-let days = doMagic(setFive);
+let days = doMagic(setSix);
+
+console.log(days);
 
 // get reimbursements in a dollar amount
 let reimbursements = calcReimbursements(days);
