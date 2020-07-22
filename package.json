@@ -10,6 +10,7 @@
   "author": "Nick Agliano (https://nickagliano.com)",
   "license": "ISC",
   "dependencies": {
-    "moment": "^2.27.0"
+    "moment": "^2.27.0",
+    "prompt": "^1.0.0"
   }
 }

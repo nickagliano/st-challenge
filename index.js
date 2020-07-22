@@ -5,186 +5,35 @@
     Completed 7/22/2020
 */
 
-import moment from 'moment'; // for date handling
-import fs from 'fs'; // to read JSON objects from local file system
+import Set from './Set.js';
+import Utilities from './Utilities.js';
 
-// Project class
-class Project {
-    constructor(projectNumber, cityCost, startDate, endDate) {
-        this.projectNumber = projectNumber;
-        this.cityCost = cityCost;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.listOfDays = this.buildListOfDays();
-    }
+let util = new Utilities();
 
-    // class functions
+// get command-line arguments, excluding 'npm' and 'start'
+let args = process.argv.slice(2);
 
-    buildListOfDays() {
-        let numDays = this.getNumDays();
-        let list = [];
+if (args.length < 1) {
+    util.printMissingInput();
+} else {
+    if (util.validateArgs(args)) {
+        for (let arg of args) {
+            util.printHeader(arg);
+
+            let set = new Set(arg); // build new set by passing the argument to constructor
+
+            // get each day and calculate if it's a travel or full day
+            //  and gracefully handle overlapping project days!
+            //       a.k.a. do magic
+            let days = set.getDayTypes();
         
-        for (let i = 0; i <= numDays; i++) {
-            list.push(moment(this.startDate, 'M/D/YY').add(i, 'days').format('M/D/YY'));
-        }
+            // get reimbursements in a dollar amount
+            let reimbursements = util.sumReimbursements(days);
 
-        if (list.length === 0) {
-            return null;
-        } else {
-            return list;
-        }
-    }
-
-    alertError() {
-        console.log(`*********************************************************************************`);
-        console.log(`Warning!!!! Found a project with an end date that is before the start date!`);
-        console.log(`Project number: ${this.projectNumber} --- startDate: ${this.startDate} ---- endDate: ${this.endDate}`);
-        console.log(`This project will be ignored in calculating the reimbursement amount.`);
-        console.log(`*********************************************************************************`);
-    }
-
-    getNumDays() {
-        let start = moment(this.startDate, 'M/D/YY');
-        let end = moment(this.endDate, 'M/D/YY');
-
-        let num = end.diff(start, 'days');
-
-        // if num < 0 that means the end date is before the start date
-        if (num < 0) {
-            this.alertError(); // print an error to the user
-        }
-
-        return num;
-    }
-}
-
-function sortProjectsByDate(projects) {
-    let sorted = projects.sort((a,b) => new moment(a.startDate, 'M/D/YY').format('YYYYMMDD') - new moment(b.startDate, 'M/D/YY').format('YYYYMMDD'));
-    return sorted;
-}
-
-function buildSet(path) {
-    let set = [];
-    let rawData = fs.readFileSync(path);
-    let obj = JSON.parse(rawData);
-
-    for (let key in obj) {
-        let project = obj[key];
-        set.push(new Project(key, project.cityCost, project.startDate, project.endDate));
-    }
-
-    // Sort Projects by start date (to make calculations easier)
-    set = sortProjectsByDate(set);
-    
-    return set;
-}
-
-
-function getDollarAmount(dayType, cityCost) {
-    if (dayType === 'travel') {
-        if (cityCost === 'high') {
-            console.log('travel high');
-            return 55;
-        } else { // low
-            console.log('travel low');
-            return 45;
-        }
-    } else { // full
-        if (cityCost === 'high') {
-            console.log('full high');
-            return 85;
-        } else { // low
-            console.log('full low');
-            return 75;
-        }
-    }
-}
-
-function calcReimbursements(days) {
-    let total = 0;
-
-    for (let key in days) {
-        total += getDollarAmount(days[key].dayType, days[key].cityCost);
-    }
-
-    return total;
-}
-
-
-function doMagic(projects) {
-    let processedDays = {}; // object to hold days and their computed attributes (low or high cost, travel or full day)
-    let mostRecentDate = null; // stores the date that was most recently processed — used as a progress marker
-    let oldestDate = null; // oldest in terms of when that date occurs/occured, not when it was processed — used as a progress marker
-
-    for (let project of projects) { // iterate through projects
-        for (let day of project.listOfDays) { // iterate through dates of a project
-           
-            // the initial case -- the mostRecentDate variable is only null when processing the *first date* of the set, otherwise it will be a date, like '9/1/15'
-            if (mostRecentDate === null) { 
-                processedDays[day] = {dayType: 'travel', cityCost: project.cityCost}; // assign attributes to first day
-                oldestDate = day; // initialize oldestDate day to the only date that has been process thus far
-                mostRecentDate = day; // update mostRecentDate
-                continue;
-            } 
-
-            // the number of days between the date currently being processed and the date most recently processed
-            let diff = moment(day, 'M/D/YY').diff(moment(mostRecentDate, 'M/D/YY'), 'days');
-
-            // utilizes oldest date to verify that a date previously labeled as "travel" doesn't get overwritten to "full"
-            let isValidGap = moment(day, 'M/D/YY').isAfter(moment(oldestDate, 'M/D/YY'));
+            util.printPrettyDays(days);
         
-            if (diff > 1 && isValidGap) { // it's a gap
-                // update mostRecentDate to be a travel day (end of a project segment)
-                processedDays[oldestDate].dayType = 'travel';
-
-                // set current date to be a travel day (start of a new project segment)
-                processedDays[day] = {dayType: 'travel', cityCost: project.cityCost};
-
-            } else { // it's a full day!
-                if (!processedDays[day]) { // it's a brand new full day (that date doesn't exist in the processedDates object)
-                    processedDays[day] = {dayType: 'full', cityCost: project.cityCost};
-                } else {
-                    if (processedDays[day].cityCost === 'low') { // high can overwrite low, but not vice-versa
-                        processedDays[day].cityCost = project.cityCost;
-                    }
-                }
-            }
-
-
-            mostRecentDate = day; // update mostRecentDate
-
-            // update the oldestDate (if the date just processed is after the old oldestDate)
-            if (moment(mostRecentDate, 'M/D/YY').isAfter(moment(oldestDate, 'M/D/YY'))) {
-                oldestDate = mostRecentDate;
-            }
-
+            console.log('\x1b[33m%s\x1b[0m', `\nReimbursement amount for Set #${arg}: $${reimbursements}\n`);
+            // util.printDivider();
         }
     }
-
-    processedDays[oldestDate].dayType = 'travel'; // manually change last day to a travel day
-
-    return processedDays;
 }
-
-
-// grab Projects from JSON (in the /sets/ directory)
-
-let setOne = buildSet('sets/1.json'); // 165
-let setTwo = buildSet('sets/2.json'); // 590
-let setThree = buildSet('sets/3.json'); // 445
-let setFour = buildSet('sets/4.json'); // 185
-let setFive = buildSet('sets/5.json'); // 510
-let setSix = buildSet('sets/6.json'); // 920
-
-console.log(setSix);
-
-// do magic
-let days = doMagic(setSix);
-
-console.log(days);
-
-// get reimbursements in a dollar amount
-let reimbursements = calcReimbursements(days);
-
-console.log(reimbursements);
-
