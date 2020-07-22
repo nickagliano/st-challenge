@@ -1,11 +1,15 @@
 {
   "name": "st-challenge",
   "version": "1.0.0",
+  "type": "module",
   "description": "A coding challenge for SimpleThread",
   "main": "index.js",
   "scripts": {
-     "start": "node index.js"
+    "start": "node index.js"
   },
   "author": "Nick Agliano (https://nickagliano.com)",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.27.0"
+  }
 }
