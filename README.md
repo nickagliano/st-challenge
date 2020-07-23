@@ -19,6 +19,9 @@ You can also pass multiple sets in one execution. For example: `npm start 1 3 4`
 
 ## Understanding the code
 
+### index.js
+- entry-point of the project, creates instances of other classes
+
 ### Project.js
 - holds the Project class and all of its class functions
 - the Project class holds information about a project
